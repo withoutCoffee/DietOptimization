@@ -6,10 +6,8 @@ class Diet:
     Diet Problem, with google Ortools.
     """    
     def __init__(self,*args,**kwargs):
-        with open(kwargs.get("nutrients_path"),"r") as openfile:
-            self._nutrients = json.load(openfile)
-        with open(kwargs.get("data_path"),"r") as openfile:
-            self._data = json.load(openfile)
+        self._nutrients = kwargs.get("nutrients")
+        self._data = kwargs.get("data")
 
     def _get_data(self):
         return self._nutrients, self._data

@@ -1,6 +1,6 @@
 
 from src.Diet import Diet
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import json
 
 app = Flask(__name__)
@@ -21,15 +21,30 @@ def get_data():
 @app.route("/opt")
 def optimization():
     # Dafault path
-    diet = Diet(nutrients_path = "data/nutrients.json", data_path = "data/data.json")
+    with open("data/forOpt.json") as openfile:
+        req_data = json.load(openfile)
+        diet = Diet(nutrients= req_data["nutrients"], data = req_data["data"])
+        diet._load_constraints()
+        diet._fit()
+        result, amount = diet._result()
+        return jsonify({"Result":result,"amount":amount})
+    return jsonify({status:300})
+
+@app.route("/opt/run",methods=['POST'])
+def run():
+    # handle json data and optimization.
+    req_data = request.get_json()
+    
+    diet = Diet(nutrients= req_data["nutrients"], data = req_data["data"])
     diet._load_constraints()
     diet._fit()
     result, amount = diet._result()
     return jsonify({"Result":result,"amount":amount})
 
+
 @app.route("/")
 def home():
-    return "<h2>App de otimização de compras a partir de nutrientes diários necessários.</h2>"
+    return "<h2>App de otimização de compras a partir de nutrientes diários necessários.<br/>Rota post json:/opt/run</h2>"
 if __name__ == '__main__':
     app.run(debug=True)
 
