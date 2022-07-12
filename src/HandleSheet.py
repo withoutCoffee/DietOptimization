@@ -52,16 +52,20 @@ class HandleSheet:
         """        
         data = kwargs.get("data")
         formated_data = []
-        print(np.array(data))
+        
         for item in np.array(data):
             arr = []
             for element in item:
-                # Converte replace number with (,) to number with (.)
-                if re.search("^\d+|^\d+,\d+\b",element):
-                    arr.append(float(element.replace(",",".")))
-                else:
-                    arr.append(element)
+                try:
+                    # Converte replace number with (,) to number with (.)
+                    if type(element) is str and re.search("^\d$|\d+,\d+",element):
+                        arr.append(float(element.replace(",",".")))
+                    else:
+                        arr.append(element)
+                except Exception as e:
+                    print(e,element)
             formated_data.append(arr)
+        
         return formated_data 
     
     @staticmethod
