@@ -37,6 +37,7 @@ class HandleSheet:
             pandas dataframe: _description_
         """        
         return self._nutrients, self._foods
+
     def data_to_json(self):
         self._nutrients = HandleSheet.to_json(data = self._nutrients)
         self._foods = HandleSheet.to_json(data = self._foods)
@@ -57,8 +58,8 @@ class HandleSheet:
             arr = []
             for element in item:
                 try:
-                    # Converte replace number with (,) to number with (.)
-                    if type(element) is str and re.search("^\d$|\d+,\d+",element):
+                    # Search to floats and convert replace number with (,) to number with (.)
+                    if type(element) is str and re.search("^\d+$|\d+,\d+",element):
                         arr.append(float(element.replace(",",".")))
                     else:
                         arr.append(element)
@@ -76,9 +77,8 @@ class HandleSheet:
 if __name__ == "__main__":
     url = "https://docs.google.com/spreadsheets/d/1gFzQr62oK6oNVfTGdutsSUFIlNUFgtLaKt7uFwLKuJs/edit#gid=0"
     hf = HandleSheet(sheet_url = url)
-    nutrients, foods = hf.read_sheet().get_data()
-    data = hf.read_sheet().data_to_json().get_data()
+    nutrients, foods = hf.read_sheet().data_to_json().get_data()
     
-    #print(data)
+    #print(foods)
     #print(HandleFile.get_sheet_id(url))
     

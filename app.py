@@ -1,11 +1,18 @@
 
 from src.Diet_Model import Diet_Model
+from src.HandleSheet import HandleSheet
 from flask import Flask, jsonify, request
 import json
 
 app = Flask(__name__)
 
-
+def run(nutrients,foods):
+    diet = Diet_Model(nutrients= nutrients, data = foods)
+    diet._load_constraints()
+    diet._fit()
+    result, amount = diet._result()
+    return result, amount
+    
 @app.route("/nutrients")
 def get_nutrients():
     # Dafault path
@@ -31,16 +38,21 @@ def optimization():
     return jsonify({"status":500})
 
 @app.route("/opt/run",methods=['POST'])
-def run():
+def exec():
     # handle json data and optimization.
     req_data = request.get_json()
-    
-    diet = Diet_Model(nutrients= req_data["nutrients"], data = req_data["data"])
-    diet._load_constraints()
-    diet._fit()
-    result, amount = diet._result()
+    result, amount = run(req_data["nutrients"],req_data["data"])
     return jsonify({"Result":result,"amount":amount})
 
+@app.route("/opt/sheets",methods=['POST'])
+def run_sheet():
+    req_data = request.get_json()
+    hs = HandleSheet(sheet_url = req_data["sheet_url"])
+    nutrients, foods = hs.read_sheet().data_to_json().get_data()
+    result, amount = run(nutrients, foods)
+    return jsonify({"Result":result,"amount":amount})
+    
+    
 
 @app.route("/")
 def home():
