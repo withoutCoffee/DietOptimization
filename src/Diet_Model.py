@@ -1,7 +1,7 @@
 from ortools.linear_solver import pywraplp
 import json
 
-class Diet:
+class Diet_Model:
     """Optimizarion class with generic solution for
     Diet Problem, with google Ortools.
     """    

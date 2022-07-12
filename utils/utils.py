@@ -1,54 +1,42 @@
 # Solution test for diet problem, with simples inside ortools
 import json
 from ortools.linear_solver import pywraplp
+import pandas as pd
+import numpy as np
 
-nutrients = []
-data = []
-with open("data/nutrients.json","r") as openfile:
-    nutrients = json.load(openfile)
-with open("data/data.json","r") as openfile:
-    data = json.load(openfile)
 
-solver = pywraplp.Solver('Diet Problem Example',pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
+def json_to_csv(data_path,write_path):
+    data_cols = [
+        "Food",
+        "Unit",
+        "Price(cents)",
+        "Calories (kcal)",
+        "Protein (g)",
+        "Calcium (g)",
+        "Iron (mg)",
+        "Vitamin A (KIU)",
+        "Thiamine (mg)",
+        "Riboflavin (mg)",
+        "Niacin (mg)",
+        "Ascorbic Acid (mg)"]
 
-# Create the variables
-foods = [solver.NumVar(0.0,solver.infinity(), item[0]) for item in data]
-print('Number of variables:',solver.NumVariables())
+    with open(data_path) as openfile:
+        # Read file as a python list
+        data = json.load(openfile)
+        # Write excel file with pandas
+        pd.DataFrame(data=data,columns = data_cols).to_excel(write_path)
 
-# Define Constraints. One constraint per nutrient
-constraints = []
-for i, nutrient in enumerate(nutrients):
-    # constraint >= nutrient value
-    constraints.append(solver.Constraint(nutrient[1], solver.infinity()))
-    for j, item in enumerate(data):
-        nutrient_col = i + 3
-        constraints[i].SetCoefficient(foods[j],item[nutrient_col])
+def read_json(data_path):
+    with open(data_path) as openfile:
+        # Read file as a python list
+        data = json.load(openfile)
+        print(data)
 
-print(f"Number of constraints:{solver.NumConstraints()}")
 
-# Objective function: Minimize sum of (price nomalized) foods
-objective = solver.Objective()
-for food in foods:
-    objective.SetCoefficient(food,1)
-objective.SetMinimization()
 
-status = solver.Solve()
+if __name__ == "__main__":
 
-# Check the problem has an optimal solution.
-if status != solver.OPTIMAL:
-    print('The problem does not have an optimal solution!')
-    if status == solver.FEASIBLE:
-        print('A potentially suboptimal solution was found.')
-    else:
-        print('The solver could not solve the problem.')
-        exit(1)
-
-# Display the amounts (in dollars)  to purchase of each food
-nutrients_result = [0] * len(nutrients)
-
-for i, food in enumerate(foods):
-    if food.solution_value() > 0.0:
-        print('{}: ${}'.format(data[i][0], 365. * food.solution_value()))
-        for j, _ in enumerate(nutrients):
-            nutrients_result[j] += data[i][j + 3] * food.solution_value()
-print('\nOptimal annual price: ${:.4f}'.format(365. * objective.Value()))
+    data_path = "data/data.json"
+    write_path = "data/data.xlsx"
+    #json_to_csv(data_path,write_path)
+    #read_json(data_path)
