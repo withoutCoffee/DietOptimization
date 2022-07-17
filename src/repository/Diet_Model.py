@@ -4,7 +4,9 @@ import json
 class Diet_Model:
     """Optimizarion class with generic solution for
     Diet Problem, with google Ortools.
-    """    
+    """
+    _days = 7  # days of diet
+      
     def __init__(self,*args,**kwargs):
         self._nutrients = kwargs.get("nutrients")
         self._data = kwargs.get("data")
@@ -25,8 +27,8 @@ class Diet_Model:
                 nutrient_col = i + 3
                 self._constraints[i].SetCoefficient(self._foods[j],item[nutrient_col])
         
-        print('Number of variables:',self._solver.NumVariables())
-        print(f"Number of constraints:{self._solver.NumConstraints()}")
+        #print('Number of variables:',self._solver.NumVariables())
+        #print(f"Number of constraints:{self._solver.NumConstraints()}")
 
 
     def _fit(self):
@@ -41,24 +43,26 @@ class Diet_Model:
         status = self._solver.Solve()
         # Check the problem has an optimal solution.
         if status != self._solver.OPTIMAL:
-            print('The problem does not have an optimal solution!')
+            #print('The problem does not have an optimal solution!')
             if status == self._solver.FEASIBLE:
-                print('A potentially suboptimal solution was found.')
+                pass#print('A potentially suboptimal solution was found.')
             else:
-                print('The solver could not solve the problem.')
-                return
+                #print('The solver could not solve the problem.')
+                return 'The solver could not solve the problem.'
         # Display the amounts (in dollars)  to purchase of each food
         nutrients_result = [0] * len(self._nutrients)
         result = {}
         for i, food in enumerate(self._foods):
             if food.solution_value() > 0.0:
-                # Cost of 30 days
-                result[self._data[i][0]] = 30 * food.solution_value()
-                #print('{}: ${}'.format(self._data[i][0], 365. * food.solution_value()))
+                food_name = 0
+                price = 2
+                total = self._days * food.solution_value()
+                
+                result[self._data[i][food_name]] = {f"quantity":total/self._data[i][price],"amount":total}
+                
                 for j, _ in enumerate(self._nutrients):
                     nutrients_result[j] += self._data[i][j + 3] * food.solution_value()
-        #print('\nOptimal annual price: ${:.4f}'.format(365. * self._objective.Value()))
-        amount = 30 * self._objective.Value()
+        amount = self._days * self._objective.Value()
         return result, amount
 
 if __name__ == '__main__':

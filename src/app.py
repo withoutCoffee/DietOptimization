@@ -1,10 +1,18 @@
 
-from src.Diet_Model import Diet_Model
-from src.HandleSheet import HandleSheet
+from repository.Diet_Model import Diet_Model
+from repository.HandleSheet import HandleSheet
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import json
 
+from configurations import DevelopmentConfig, ProductionConfig
+
+
 app = Flask(__name__)
+app.config.from_object(ProductionConfig)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 def run(nutrients,foods):
     diet = Diet_Model(nutrients= nutrients, data = foods)
@@ -40,25 +48,31 @@ def optimization():
 @app.route("/opt/run",methods=['POST'])
 def exec():
     # handle json data and optimization.
-    req_data = request.get_json()
-    result, amount = run(req_data["nutrients"],req_data["data"])
-    return jsonify({"Result":result,"amount":amount})
+    try:
+        req_data = request.get_json()
+        result, amount = run(req_data["nutrients"],req_data["data"])
+        return jsonify({"Result":result,"amount":amount})
+    except Exception as e:
+        return jsonify(e)
 
 @app.route("/opt/sheets",methods=['POST'])
 def run_sheet():
     req_data = request.get_json()
-    hs = HandleSheet(sheet_url = req_data["sheet_url"])
-    nutrients, foods = hs.read_sheet().data_to_json().get_data()
-    result, amount = run(nutrients, foods)
-    return jsonify({"Result":result,"amount":amount})
+    try:
+        hs = HandleSheet(sheet_url = req_data["sheet_url"])
+        nutrients, foods = hs.read_sheet().data_to_json().get_data()
+        result, amount = run(nutrients, foods)
+        return jsonify({"result":result,"amount":amount})
+    except Exception as e:
+        
+        return jsonify("Dataset has a limited. 200 foods!")
     
-    
-
 @app.route("/")
 def home():
-    return "<h2>App de otimização de compras a partir de nutrientes diários necessários.<br/>Rota post json:/opt/run</h2>"
+    return "<h2><a href='https://github.com/withoutCoffee/DietOptimization'>>Info<</h2>"
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 
     

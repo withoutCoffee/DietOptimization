@@ -4,10 +4,9 @@ import numpy as np
 import re
 
 class HandleSheet:
+    _foods_limit = 200
 
     def __init__(self,*args,**kwargs):
-        """_summary_
-        """        
         try:
             self._sheets_url = kwargs.get("sheet_url")
         except:
@@ -25,6 +24,9 @@ class HandleSheet:
         try:
             self._nutrients = pd.read_csv(nutrients_url)
             self._foods = pd.read_csv(foods_url)
+            
+            if self._foods_limit < self._foods.shape[0] : 
+                raise RuntimeError('The foods has gone over the limit. 200 foods.')
         except:
             self._nutrients = None
             self._foods = None
