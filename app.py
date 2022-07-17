@@ -1,11 +1,11 @@
 
-from repository.Diet_Model import Diet_Model
-from repository.HandleSheet import HandleSheet
+from src.repository.Diet_Model import Diet_Model
+from src.repository.HandleSheet import HandleSheet
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
 
-from configurations import DevelopmentConfig, ProductionConfig
+from src.configurations import DevelopmentConfig, ProductionConfig
 
 
 app = Flask(__name__)
